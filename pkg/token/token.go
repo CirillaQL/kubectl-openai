@@ -19,7 +19,7 @@ func SaveToken(token, filepath string) error {
 		log.Fatalf("Failed to set token. error: %v", err)
 	}
 	defer file.Close()
-	_, err = file.WriteString(token + "\n")
+	_, err = file.WriteString(token)
 	if err != nil {
 		log.Fatalf("Failed to set token. error: %v", err)
 	}

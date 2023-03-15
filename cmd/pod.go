@@ -6,28 +6,30 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"github.com/CirillaQL/kubectl-openai/pkg/log"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/CirillaQL/kubectl-openai/pkg/client"
+	"github.com/CirillaQL/kubectl-openai/pkg/openai"
+	"github.com/CirillaQL/kubectl-openai/pkg/token"
 	"github.com/spf13/cobra"
 )
 
 var namespace string
-var name string
+
+const question_begin = "我将提供一个Kubernetes Pod的详情, 请分析该Pod的情况"
 
 // podCmd represents the pod command
 var podCmd = &cobra.Command{
 	Use:   "pod",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Use chatGPT to help analyse pod status",
+	Long:  `Use chatGPT to help analyse pod status`,
 	Run: func(cmd *cobra.Command, args []string) {
-		name = args[0]
+		name := args[0]
+		if len(name) <= 0 {
+			log.Error("Failed to get pod namespace")
+		}
 		client, err := client.LoadClient()
 		if err != nil {
 			panic(err)
@@ -36,12 +38,52 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			panic(err.Error())
 		}
-		fmt.Println(pod)
+		podStr := fmt.Sprint(pod)
+		tokenString, err := token.ReadToken(TokenPath)
+		if err != nil {
+			panic(err)
+		}
+		result, err := openai.Ask(tokenString, question_begin+"\n"+podStr)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(result)
+	},
+}
+
+var podsCmd = &cobra.Command{
+	Use:   "pods",
+	Short: "Use chatGPT to help analyse pods status",
+	Long:  `Use chatGPT to help analyse pods status`,
+	Run: func(cmd *cobra.Command, args []string) {
+		namespace = args[0]
+		if len(namespace) <= 0 {
+			log.Error("Failed to get pods ")
+		}
+		client, err := client.LoadClient()
+		if err != nil {
+			panic(err)
+		}
+		pods, err := client.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
+		if err != nil {
+			panic(err.Error())
+		}
+		podsStr := fmt.Sprint(pods)
+		tokenString, err := token.ReadToken(TokenPath)
+		if err != nil {
+			panic(err)
+		}
+		result, err := openai.Ask(tokenString, question_begin+"\n"+podsStr)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(result)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(podCmd)
+	rootCmd.AddCommand(podsCmd)
 
 	// Here you will define your flags and configuration settings.
 
