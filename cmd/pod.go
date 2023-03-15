@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/CirillaQL/kubectl-openai/pkg/log"
+	"github.com/CirillaQL/kubectl-openai/pkg/util"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -43,7 +44,9 @@ var podCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
+		s := util.StartLoading()
 		result, err := openai.Ask(tokenString, question_begin+"\n"+podStr)
+		s.Stop()
 		if err != nil {
 			panic(err)
 		}
@@ -73,7 +76,9 @@ var podsCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
+		s := util.StartLoading()
 		result, err := openai.Ask(tokenString, question_begin+"\n"+podsStr)
+		s.Stop()
 		if err != nil {
 			panic(err)
 		}
