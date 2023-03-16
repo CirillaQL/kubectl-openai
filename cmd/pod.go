@@ -19,7 +19,8 @@ import (
 
 var namespace string
 
-const question_begin = "我将提供一个Kubernetes Pod的详情, 请分析该Pod的情况"
+const pod_question_begin = "我将提供一个Kubernetes Pod的详情, 请分析该Pod的情况"
+const pods_question_begin = "我将提供一个Kubernetes Pods的列表， 请分析这些Pods的情况"
 
 // podCmd represents the pod command
 var podCmd = &cobra.Command{
@@ -39,14 +40,15 @@ var podCmd = &cobra.Command{
 		if err != nil {
 			panic(err.Error())
 		}
+		// TODO: optimize pod struct to reduce prompts cost
 		podStr := fmt.Sprint(pod)
 		tokenString, err := token.ReadToken(TokenPath)
 		if err != nil {
 			panic(err)
 		}
-		s := util.StartLoading()
-		result, err := openai.Ask(tokenString, question_begin+"\n"+podStr)
-		s.Stop()
+		util.LoadingStart()
+		result, err := openai.Ask(tokenString, pod_question_begin+"\n"+podStr)
+		util.LoadingStop()
 		if err != nil {
 			panic(err)
 		}
@@ -69,16 +71,17 @@ var podsCmd = &cobra.Command{
 		}
 		pods, err := client.CoreV1().Pods(namespace).List(context.TODO(), metav1.ListOptions{})
 		if err != nil {
-			panic(err.Error())
+			panic(err)
 		}
+		// TODO: optimize pods struct to reduce prompts cost
 		podsStr := fmt.Sprint(pods)
 		tokenString, err := token.ReadToken(TokenPath)
 		if err != nil {
 			panic(err)
 		}
-		s := util.StartLoading()
-		result, err := openai.Ask(tokenString, question_begin+"\n"+podsStr)
-		s.Stop()
+		util.LoadingStart()
+		result, err := openai.Ask(tokenString, pods_question_begin+"\n"+podsStr)
+		util.LoadingStop()
 		if err != nil {
 			panic(err)
 		}
