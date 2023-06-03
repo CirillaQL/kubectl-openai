@@ -13,16 +13,13 @@ func SaveToken(token, filepath string) error {
 	if filepath == "" {
 		log.Logger.Fatal("Failed to get token filepath")
 	}
-	err := os.Remove(filepath)
-	if err != nil {
-		return err
-	}
+	os.Remove(filepath)
 	file, err := os.Create(os.ExpandEnv(filepath))
 	if err != nil {
 		log.Logger.Fatalf("Failed to set token. error: %v", err)
 	}
 	defer file.Close()
-	_, err = file.WriteString(token)
+	_, err = file.WriteString(token + "\n")
 	if err != nil {
 		log.Logger.Fatalf("Failed to set token. error: %v", err)
 	}
