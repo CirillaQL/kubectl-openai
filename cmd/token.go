@@ -22,7 +22,7 @@ var tokenCmd = &cobra.Command{
 		openAIToken = args[0]
 		err := token.SaveToken(openAIToken, TokenPath)
 		if err != nil {
-			log.Fatalf("save token into file failed. error: %v", err)
+			log.Logger.Fatalf("save token into file failed. error: %v", err)
 		}
 	},
 }

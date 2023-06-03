@@ -19,8 +19,8 @@ import (
 
 var namespace string
 
-const pod_question_begin = "我将提供一个Kubernetes Pod的详情, 请分析该Pod的情况"
-const pods_question_begin = "我将提供一个Kubernetes Pods的列表， 请分析这些Pods的情况"
+const podQuestion = "I will give you a kubernetes' pod's detail, please help me to analyze it."
+const podsQuestion = "I will give you some kubernetes' pods' details, please help me to analyze them."
 
 // podCmd represents the pod command
 var podCmd = &cobra.Command{
@@ -30,7 +30,7 @@ var podCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 		if len(name) <= 0 {
-			log.Error("Failed to get pod namespace")
+			log.Logger.Error("Failed to get pod namespace")
 		}
 		client, err := client.LoadClient()
 		if err != nil {
@@ -47,7 +47,7 @@ var podCmd = &cobra.Command{
 			panic(err)
 		}
 		util.LoadingStart()
-		result, err := openai.Ask(tokenString, pod_question_begin+"\n"+podStr)
+		result, err := openai.Ask(tokenString, podQuestion+"\n"+podStr)
 		util.LoadingStop()
 		if err != nil {
 			panic(err)
@@ -63,7 +63,7 @@ var podsCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		namespace = args[0]
 		if len(namespace) <= 0 {
-			log.Error("Failed to get pods ")
+			log.Logger.Error("Failed to get pods ")
 		}
 		client, err := client.LoadClient()
 		if err != nil {
@@ -80,7 +80,7 @@ var podsCmd = &cobra.Command{
 			panic(err)
 		}
 		util.LoadingStart()
-		result, err := openai.Ask(tokenString, pods_question_begin+"\n"+podsStr)
+		result, err := openai.Ask(tokenString, podsQuestion+"\n"+podsStr)
 		util.LoadingStop()
 		if err != nil {
 			panic(err)
