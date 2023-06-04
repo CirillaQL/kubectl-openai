@@ -1,7 +1,7 @@
 # kubectl-openai
 Solve Kubernetes problems using OpenAI
 
-![demo](https://github.com/cirillaql/kubectl-openai/blob/main/images/example.gif)
+![demo](https://github.com/CirillaQL/kubectl-openai/blob/master/images/example.gif)
 
 ## Quick Start
 1. Download the binary from [Github Releases](https://github.com/CirillaQL/kubectl-openai/releases)
