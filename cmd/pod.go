@@ -28,16 +28,20 @@ var podCmd = &cobra.Command{
 	Short: "Use chatGPT to help analyse pod status",
 	Long:  `Use chatGPT to help analyse pod status`,
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx := context.Background()
 		name := args[0]
+
 		if len(name) <= 0 {
 			log.Logger.Error("Failed to get pod namespace")
 		}
 		client, err := client.LoadClient()
 		if err != nil {
+			log.Logger.Fatalf("Failed to load k8s client, error: %+v", err)
 			panic(err)
 		}
-		pod, err := client.CoreV1().Pods(namespace).Get(context.TODO(), name, metav1.GetOptions{})
+		pod, err := client.CoreV1().Pods(namespace).Get(ctx, name, metav1.GetOptions{})
 		if err != nil {
+			log.Logger.Fatalf("Failed to get Pod: %s, Error: %v", name, err)
 			panic(err.Error())
 		}
 		// TODO: optimize pod struct to reduce prompts cost
@@ -98,7 +102,7 @@ func init() {
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// podCmd.PersistentFlags().String("foo", "", "A help for foo")
-	podCmd.Flags().StringVarP(&namespace, "namespace", "n", "", "Pod's namespace")
+	podCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "Pod's namespace")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

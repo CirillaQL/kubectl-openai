@@ -2,8 +2,7 @@ package openai
 
 import (
 	"context"
-	"fmt"
-
+	"github.com/CirillaQL/kubectl-openai/pkg/log"
 	ai "github.com/sashabaranov/go-openai"
 )
 
@@ -22,7 +21,7 @@ func Ask(token, Question string) (string, error) {
 		},
 	)
 	if err != nil {
-		fmt.Printf("ChatCompletion error: %v\n", err)
+		log.Logger.Fatalf("ChatCompletion error: %v\n", err)
 	}
 	return resp.Choices[0].Message.Content, err
 }
