@@ -12,18 +12,18 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-const serviceQuestion = "I will give you a kubernetes' service's detail, please help me to analyze it"
+const ingressQuestion = "I will give you a kubernetes' service's detail, please help me to analyze it"
 
-var serviceCmd = &cobra.Command{
-	Use:   "service",
-	Short: "Use chatGPT to help analyse service status",
-	Long:  "Use chatGPT to help analyse service status",
+var ingressCmd = &cobra.Command{
+	Use:   "ingress",
+	Short: "Use chatGPT to help analyse ingress status",
+	Long:  "Use chatGPT to help analyse ingress status",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 		name := args[0]
 
 		if len(name) <= 0 {
-			log.Logger.Error("Failed to get service namespace")
+			log.Logger.Error("Failed to get ingress namespace")
 		}
 		client, err := client.LoadClient()
 		if err != nil {
@@ -31,18 +31,18 @@ var serviceCmd = &cobra.Command{
 			panic(err)
 		}
 
-		service, err := client.CoreV1().Services(namespace).Get(ctx, name, metav1.GetOptions{})
+		ingress, err := client.NetworkingV1().Ingresses(namespace).Get(ctx, name, metav1.GetOptions{})
 		if err != nil {
-			log.Logger.Fatalf("Failed to get Service: %s, Error: %v", name, err)
+			log.Logger.Fatalf("Failed to get Ingress: %s, Error: %v", name, err)
 			panic(err.Error())
 		}
-		podStr := fmt.Sprint(service)
+		ingressStr := fmt.Sprint(ingress)
 		tokenString, err := token.ReadToken(TokenPath)
 		if err != nil {
 			panic(err)
 		}
 		util.LoadingStart()
-		result, err := openai.Ask(tokenString, serviceQuestion+"\n"+podStr)
+		result, err := openai.Ask(tokenString, ingressQuestion+"\n"+ingressStr)
 		util.LoadingStop()
 		if err != nil {
 			panic(err)
@@ -52,7 +52,7 @@ var serviceCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(serviceCmd)
+	rootCmd.AddCommand(ingressCmd)
 
-	serviceCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "Service's namespace")
+	ingressCmd.Flags().StringVarP(&namespace, "namespace", "n", "default", "Ingress's namespace")
 }
